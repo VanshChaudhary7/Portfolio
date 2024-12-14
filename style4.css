@@ -1,0 +1,52 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: sour gummy;
+}
+body{
+    background-image: url(skill_background.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+header{
+    color:aliceblue ;
+    position: relative;
+    top: 39px;
+    left: 526px;
+    font-size: 23px;
+}
+header span{
+    margin: 0px 25px;
+}
+a{
+    padding: 10px;
+}
+a:link{
+    text-decoration: none;
+    background-color:aliceblue;
+    
+    border-radius: 30px;
+}
+a:visited{
+    color:black;
+}
+a:hover{
+    background-color: black;
+    color:blanchedalmond;
+}
+.box{
+    position: absolute;
+    top: 220px;
+    left: 150px;
+}
+.box1{
+    display: inline-block;
+    font-size: 40px;
+}
+.box2{
+    position: absolute;
+    font-size: 200px;
+    left: 500px;
+    color: red;
+}

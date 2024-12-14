@@ -1,0 +1,45 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: sour gummy;
+}
+body{
+    background-image: url(background.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+header{
+    color:aliceblue ;
+    position: relative;
+    top: 82px;
+    left: 274px;
+    font-size: 25px;
+}
+header span{
+    margin: 0px 30px;
+    padding: 4px;
+}
+a{
+    padding: 5px;
+}
+a:link{
+    text-decoration: none;
+    background-color:aliceblue;
+    
+    border-radius: 30px;
+}
+a:visited{
+    color:black;
+}
+a:hover{
+    background-color: black;
+    color:blanchedalmond;
+}
+main h1{
+    color: aliceblue;
+    font-size: 50px;
+    position: relative;
+    left: 380px;
+    top: 290px;
+}
