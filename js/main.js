@@ -1,3 +1,15 @@
+/**
+ * Main Entry Point - User Interaction & Navigation
+ * 
+ * Handles user interactions that are NOT animation-related:
+ * - Mobile navigation toggle
+ * - Smooth scrolling
+ * - Click handlers
+ * 
+ * All animation logic has been moved to animations.js
+ * This keeps the main file focused on user interaction only.
+ */
+
 // ===========================
 // Mobile Navigation Toggle
 // ===========================
@@ -54,77 +66,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // ===========================
-// Navbar Background on Scroll
+// Set Initial State for Fade-in Animations
 // ===========================
-window.addEventListener('scroll', function() {
-    const navbar = document.getElementById('navbar');
-    if (window.scrollY > 50) {
-        navbar.style.backgroundColor = 'rgba(10, 10, 10, 0.98)';
-    } else {
-        navbar.style.backgroundColor = 'rgba(10, 10, 10, 0.95)';
-    }
-});
-
-// ===========================
-// Active Navigation Link Highlighting
-// ===========================
-window.addEventListener('scroll', function() {
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    let current = '';
-    const navbarHeight = document.getElementById('navbar').offsetHeight;
-    
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop - navbarHeight - 100;
-        const sectionHeight = section.clientHeight;
-        
-        if (window.scrollY >= sectionTop) {
-            current = section.getAttribute('id');
-        }
-    });
-    
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${current}`) {
-            link.classList.add('active');
-        }
-    });
-});
-
-// ===========================
-// Fade-in Animation on Scroll (Optional)
-// ===========================
-function fadeInOnScroll() {
-    const elements = document.querySelectorAll('.skill-card, .project-card, .education-card');
-    
-    elements.forEach(element => {
-        const elementTop = element.getBoundingClientRect().top;
-        const elementBottom = element.getBoundingClientRect().bottom;
-        
-        if (elementTop < window.innerHeight && elementBottom > 0) {
-            element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
-        }
-    });
-}
-
-// ===========================
-// Performance: Debounce scroll events
-// ===========================
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Initialize fade-in elements
+// Elements start invisible and will be animated by animations.js
 document.addEventListener('DOMContentLoaded', function() {
     const elements = document.querySelectorAll('.skill-card, .project-card, .education-card');
     elements.forEach(element => {
@@ -132,11 +76,4 @@ document.addEventListener('DOMContentLoaded', function() {
         element.style.transform = 'translateY(20px)';
         element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     });
-    
-    // Apply debounce to scroll-heavy functions
-    const debouncedFadeIn = debounce(fadeInOnScroll, 50);
-    
-    // Run on load and scroll with debouncing
-    fadeInOnScroll();
-    window.addEventListener('scroll', debouncedFadeIn);
 });
