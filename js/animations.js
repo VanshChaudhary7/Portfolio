@@ -32,6 +32,8 @@ const AnimationSystem = (function() {
         sections: null,
         navLinks: null,
         animatedElements: null,
+        navbarHeight: 0,
+        sectionPositions: [], // Cache section positions
     };
 
     // Animation state (updated during calculation phase)
@@ -73,6 +75,15 @@ const AnimationSystem = (function() {
         DOM.sections = document.querySelectorAll('section[id]');
         DOM.navLinks = document.querySelectorAll('.nav-link');
         DOM.animatedElements = document.querySelectorAll('.skill-card, .project-card, .education-card');
+        
+        // Cache navbar height
+        DOM.navbarHeight = DOM.navbar ? DOM.navbar.offsetHeight : 60;
+        
+        // Cache section positions
+        DOM.sectionPositions = Array.from(DOM.sections).map(section => ({
+            id: section.getAttribute('id'),
+            top: section.offsetTop
+        }));
 
         console.log('[Animations] DOM references cached:', {
             navbar: !!DOM.navbar,
@@ -80,6 +91,21 @@ const AnimationSystem = (function() {
             navLinks: DOM.navLinks.length,
             animatedElements: DOM.animatedElements.length
         });
+    }
+
+    /**
+     * Update cached positions on resize
+     * Called by state observer when viewport changes
+     */
+    function updateCachedPositions() {
+        if (DOM.navbar) {
+            DOM.navbarHeight = DOM.navbar.offsetHeight;
+        }
+        
+        DOM.sectionPositions = Array.from(DOM.sections).map(section => ({
+            id: section.getAttribute('id'),
+            top: section.offsetTop
+        }));
     }
 
     /**
@@ -122,24 +148,28 @@ const AnimationSystem = (function() {
      * CALCULATION PHASE
      * Read from DOM and compute what needs to change
      * Does NOT modify DOM (prevents layout thrashing)
+     * 
+     * Performance: Uses cached positions instead of reading offsetTop/offsetHeight
+     * on every frame. Positions are recalculated only on resize.
      */
     function calculateAnimations(state) {
-        const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-        const navbarHeight = DOM.navbar ? DOM.navbar.offsetHeight : 60;
+        const scrollY = state.scrollY; // Use cached scroll from state
 
         // Calculate navbar opacity based on scroll
         animState.navbarOpacity = scrollY > 50 ? 0.98 : 0.95;
 
-        // Calculate active section
+        // Calculate active section using cached positions
         animState.activeSection = '';
-        DOM.sections.forEach(section => {
-            const sectionTop = section.offsetTop - navbarHeight - 100;
+        DOM.sectionPositions.forEach(section => {
+            const sectionTop = section.top - DOM.navbarHeight - 100;
             if (scrollY >= sectionTop) {
-                animState.activeSection = section.getAttribute('id');
+                animState.activeSection = section.id;
             }
         });
 
         // Calculate which elements should be animated
+        // Note: getBoundingClientRect is necessary here for scroll-based visibility
+        // This is acceptable because we batch all reads before any writes
         animState.elementsToAnimate = [];
         if (state.scrollAnimationsEnabled) {
             DOM.animatedElements.forEach(element => {
@@ -165,27 +195,44 @@ const AnimationSystem = (function() {
      * DOM MUTATION PHASE
      * Apply all calculated changes to DOM at once
      * Batching reduces reflows and improves performance
+     * 
+     * Performance: Only updates elements when values change
      */
     function applyAnimations(state) {
-        // Update navbar background
+        // Update navbar background only if it changed
         if (DOM.navbar) {
-            DOM.navbar.style.backgroundColor = `rgba(10, 10, 10, ${animState.navbarOpacity})`;
+            const newBgColor = `rgba(10, 10, 10, ${animState.navbarOpacity})`;
+            if (DOM.navbar.style.backgroundColor !== newBgColor) {
+                DOM.navbar.style.backgroundColor = newBgColor;
+            }
         }
 
         // Update active nav link
         DOM.navLinks.forEach(link => {
             const href = link.getAttribute('href');
-            if (href === `#${animState.activeSection}`) {
+            const shouldBeActive = href === `#${animState.activeSection}`;
+            const isActive = link.classList.contains('active');
+            
+            if (shouldBeActive && !isActive) {
                 link.classList.add('active');
-            } else {
+            } else if (!shouldBeActive && isActive) {
                 link.classList.remove('active');
             }
         });
 
-        // Apply element animations
+        // Apply element animations only to elements that need updates
         animState.elementsToAnimate.forEach(({ element, opacity, translateY }) => {
-            element.style.opacity = opacity;
-            element.style.transform = `translateY(${translateY}px)`;
+            const currentOpacity = element.style.opacity;
+            const newOpacity = String(opacity);
+            const newTransform = `translateY(${translateY}px)`;
+            
+            // Only update if values changed
+            if (currentOpacity !== newOpacity) {
+                element.style.opacity = newOpacity;
+            }
+            if (element.style.transform !== newTransform) {
+                element.style.transform = newTransform;
+            }
         });
     }
 
@@ -197,6 +244,11 @@ const AnimationSystem = (function() {
         // If animations are completely disabled, reset elements
         if (!state.scrollAnimationsEnabled) {
             resetAnimations();
+        }
+
+        // If viewport size changed, recalculate cached positions
+        if (changedKeys.includes('resize')) {
+            updateCachedPositions();
         }
 
         // If low performance mode is enabled, reduce complexity

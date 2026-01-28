@@ -147,12 +147,25 @@ const KeyboardControls = (function() {
 
     /**
      * Destroy keyboard controls
-     * Clean up event listeners
+     * Clean up event listeners and pending timeouts
      */
     function destroy() {
         if (!isInitialized) return;
 
         document.removeEventListener('keydown', handleKeyPress);
+        
+        // Clear any pending notification timeout
+        if (notificationTimeout) {
+            clearTimeout(notificationTimeout);
+            notificationTimeout = null;
+        }
+        
+        // Remove notification element if it exists
+        const notification = document.getElementById('control-notification');
+        if (notification) {
+            notification.remove();
+        }
+        
         isInitialized = false;
         
         console.log('[Controls] Keyboard shortcuts destroyed');

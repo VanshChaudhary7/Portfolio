@@ -66,9 +66,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // ===========================
-// Initialize Animated Elements Styles
+// Set Initial State for Fade-in Animations
 // ===========================
-// Set initial state for elements that will be animated by animations.js
+// Elements start invisible and will be animated by animations.js
 document.addEventListener('DOMContentLoaded', function() {
     const elements = document.querySelectorAll('.skill-card, .project-card, .education-card');
     elements.forEach(element => {
