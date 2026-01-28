@@ -109,20 +109,6 @@ function fadeInOnScroll() {
     });
 }
 
-// Initialize fade-in elements
-document.addEventListener('DOMContentLoaded', function() {
-    const elements = document.querySelectorAll('.skill-card, .project-card, .education-card');
-    elements.forEach(element => {
-        element.style.opacity = '0';
-        element.style.transform = 'translateY(20px)';
-        element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    });
-    
-    // Run on load and scroll
-    fadeInOnScroll();
-    window.addEventListener('scroll', fadeInOnScroll);
-});
-
 // ===========================
 // Performance: Debounce scroll events
 // ===========================
@@ -138,7 +124,19 @@ function debounce(func, wait) {
     };
 }
 
-// Apply debounce to scroll-heavy functions
-const debouncedFadeIn = debounce(fadeInOnScroll, 50);
-window.removeEventListener('scroll', fadeInOnScroll);
-window.addEventListener('scroll', debouncedFadeIn);
+// Initialize fade-in elements
+document.addEventListener('DOMContentLoaded', function() {
+    const elements = document.querySelectorAll('.skill-card, .project-card, .education-card');
+    elements.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    });
+    
+    // Apply debounce to scroll-heavy functions
+    const debouncedFadeIn = debounce(fadeInOnScroll, 50);
+    
+    // Run on load and scroll with debouncing
+    fadeInOnScroll();
+    window.addEventListener('scroll', debouncedFadeIn);
+});
